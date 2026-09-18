@@ -117,13 +117,14 @@ To test the Razorpay webhook locally, expose port 3000 with a tunnel (e.g. `ngro
 
 ## Deploying (Vercel)
 
-1. Import the GitHub repo into Vercel.
-2. Storage → add **Neon** (Marketplace). This sets `DATABASE_URL`.
-3. Add the other environment variables above (Production).
-4. Deploy, then set `APP_URL` to the production URL and redeploy.
-5. Create the tables and demo data against the production database:
-   `vercel env pull .env.local && npm run db:push && npm run db:seed`
-6. Razorpay Dashboard (Test mode) → Webhooks → add `https://YOUR-APP.vercel.app/api/webhooks/razorpay`, event **`payment_link.paid`**, with the same secret as `RAZORPAY_WEBHOOK_SECRET`.
+The full step-by-step guide, with dashboard clicks, commands, a checklist for checking the deployment and troubleshooting, is in **[docs/DEPLOYMENT.md](docs/DEPLOYMENT.md)**. In short:
+
+1. Push to GitHub and import the repo into Vercel.
+2. Storage → add **Neon** (no custom prefix). This sets `DATABASE_URL`.
+3. Add the remaining environment variables above.
+4. `vercel env pull`, then `db:push` and `db:seed` against the production database.
+5. Redeploy.
+6. Add the Razorpay test-mode webhook (`/api/webhooks/razorpay`, event `payment_link.paid`).
 
 ## MVP scope decisions
 
