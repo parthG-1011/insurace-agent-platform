@@ -1,0 +1,176 @@
+import type { Category, EligibilityRules, PricingRules } from "./types";
+
+/** Demo product catalogue. Insurer names are fictional. */
+export interface CatalogueProduct {
+  code: string;
+  category: Category;
+  name: string;
+  insurer: string;
+  description: string;
+  benefits: string[];
+  eligibility: EligibilityRules;
+  pricing: PricingRules;
+  defaultSumInsured: number;
+  defaultTermYears: number;
+}
+
+const termBands = [
+  { upTo: 30, factor: 1 },
+  { upTo: 40, factor: 1.4 },
+  { upTo: 50, factor: 2.3 },
+  { upTo: 65, factor: 4 },
+];
+
+export const CATALOGUE: CatalogueProduct[] = [
+  {
+    code: "TERM-SECURE",
+    category: "term",
+    name: "iSecure Term Plan",
+    insurer: "Aegis Life",
+    description: "Pure term life cover that pays a lump sum to the family if the policyholder passes away during the term.",
+    benefits: ["Cover up to 20x annual income", "Tax benefit under Sec 80C", "Terminal illness payout", "Claim settlement ratio 98.6%"],
+    eligibility: { minAge: 18, maxAge: 65, minIncome: 300_000 },
+    pricing: { kind: "per_thousand", ratePerThousand: 0.9, ageBands: termBands, smokerFactor: 1.6, incomeMultipleCap: 20 },
+    defaultSumInsured: 10_000_000,
+    defaultTermYears: 30,
+  },
+  {
+    code: "TERM-RETURN",
+    category: "term",
+    name: "Smart Term with Return of Premium",
+    insurer: "Aegis Life",
+    description: "Term cover that returns all premiums paid if the policyholder survives the policy term.",
+    benefits: ["100% premiums returned on survival", "Life cover for the full term", "Accidental death rider included"],
+    eligibility: { minAge: 18, maxAge: 55, minIncome: 500_000 },
+    pricing: { kind: "per_thousand", ratePerThousand: 1.8, ageBands: termBands, smokerFactor: 1.5, incomeMultipleCap: 15 },
+    defaultSumInsured: 5_000_000,
+    defaultTermYears: 25,
+  },
+  {
+    code: "TERM-GOLDEN",
+    category: "term",
+    name: "Golden Years Term",
+    insurer: "Bharat Shield Life",
+    description: "Short-term life cover designed for customers aged 50 and above, with simplified underwriting.",
+    benefits: ["No medicals up to ₹25 L", "10-year level cover", "Quick claim settlement"],
+    eligibility: { minAge: 50, maxAge: 70, minIncome: 200_000, excludeSmoker: true },
+    pricing: { kind: "per_thousand", ratePerThousand: 3.5, ageBands: [{ upTo: 60, factor: 1 }, { upTo: 70, factor: 1.5 }] },
+    defaultSumInsured: 2_500_000,
+    defaultTermYears: 10,
+  },
+  {
+    code: "HEALTH-FAMILY",
+    category: "health",
+    name: "Family Health Shield",
+    insurer: "Suraksha Health",
+    description: "Family floater health cover for hospitalisation, day-care procedures and pre/post hospital expenses.",
+    benefits: ["Cashless at 10,000+ hospitals", "No room-rent capping", "Free annual health check-up", "Covers spouse, children and parents"],
+    eligibility: { minAge: 18, maxAge: 65 },
+    pricing: {
+      kind: "per_thousand",
+      ratePerThousand: 12,
+      ageBands: [{ upTo: 35, factor: 1 }, { upTo: 45, factor: 1.3 }, { upTo: 55, factor: 1.8 }, { upTo: 65, factor: 2.5 }],
+      smokerFactor: 1.2,
+      preExistingFactor: 1.25,
+      dependantLoadPct: 0.35,
+    },
+    defaultSumInsured: 1_000_000,
+    defaultTermYears: 1,
+  },
+  {
+    code: "HEALTH-SENIOR",
+    category: "health",
+    name: "Senior Care Health",
+    insurer: "Suraksha Health",
+    description: "Health insurance for senior citizens, covering pre-existing conditions after a 1-year wait.",
+    benefits: ["Pre-existing diseases covered after 1 year", "Domiciliary treatment", "AYUSH treatment covered"],
+    eligibility: { minAge: 55, maxAge: 75 },
+    pricing: { kind: "per_thousand", ratePerThousand: 30, ageBands: [{ upTo: 65, factor: 1 }, { upTo: 75, factor: 1.4 }], preExistingFactor: 1.3 },
+    defaultSumInsured: 500_000,
+    defaultTermYears: 1,
+  },
+  {
+    code: "HEALTH-CRITICAL",
+    category: "health",
+    name: "Critical Illness Cover",
+    insurer: "Bharat Shield Life",
+    description: "Lump-sum payout on diagnosis of any of 32 listed critical illnesses, including cancer and heart attack.",
+    benefits: ["Lump sum on first diagnosis", "32 critical illnesses covered", "Payout independent of hospital bills"],
+    eligibility: { minAge: 18, maxAge: 60, excludePreExisting: true },
+    pricing: { kind: "per_thousand", ratePerThousand: 2.2, ageBands: [{ upTo: 35, factor: 1 }, { upTo: 45, factor: 1.6 }, { upTo: 60, factor: 2.6 }], smokerFactor: 1.5 },
+    defaultSumInsured: 2_500_000,
+    defaultTermYears: 1,
+  },
+  {
+    code: "HEALTH-ACCIDENT",
+    category: "health",
+    name: "Personal Accident Cover",
+    insurer: "Kavach General",
+    description: "Covers accidental death, permanent disability and loss of income due to an accident.",
+    benefits: ["100% payout on accidental death", "Weekly income for temporary disability", "Children's education benefit"],
+    eligibility: { minAge: 18, maxAge: 65 },
+    pricing: { kind: "per_thousand", ratePerThousand: 0.8, ageBands: [{ upTo: 65, factor: 1 }] },
+    defaultSumInsured: 2_000_000,
+    defaultTermYears: 1,
+  },
+  {
+    code: "MOTOR-CAR",
+    category: "vehicle",
+    name: "Car Comprehensive",
+    insurer: "Kavach General",
+    description: "Own-damage and third-party cover for private cars, including theft, fire and natural calamities.",
+    benefits: ["Cashless repairs at 5,000+ garages", "24x7 roadside assistance", "No-claim bonus up to 50%"],
+    eligibility: { requiresVehicle: "car", maxVehicleAgeYears: 15 },
+    pricing: { kind: "vehicle", ratePct: 2.8, depreciationPerYear: 0.1, maxDepreciation: 0.5, minPremium: 4000 },
+    defaultSumInsured: 0,
+    defaultTermYears: 1,
+  },
+  {
+    code: "MOTOR-CAR-ZERO",
+    category: "vehicle",
+    name: "Car Zero Depreciation",
+    insurer: "Kavach General",
+    description: "Comprehensive car cover with zero depreciation on parts, for cars up to 5 years old.",
+    benefits: ["Full claim with no depreciation on parts", "Engine protection", "Return to invoice cover"],
+    eligibility: { requiresVehicle: "car", maxVehicleAgeYears: 5 },
+    pricing: { kind: "vehicle", ratePct: 3.6, depreciationPerYear: 0.05, maxDepreciation: 0.25, minPremium: 6000 },
+    defaultSumInsured: 0,
+    defaultTermYears: 1,
+  },
+  {
+    code: "MOTOR-2W",
+    category: "vehicle",
+    name: "Two-Wheeler Comprehensive",
+    insurer: "Kavach General",
+    description: "Own-damage and third-party cover for scooters and motorcycles.",
+    benefits: ["Personal accident cover for rider", "Cashless garages nationwide", "Instant policy issuance"],
+    eligibility: { requiresVehicle: "two_wheeler", maxVehicleAgeYears: 15 },
+    pricing: { kind: "vehicle", ratePct: 2.2, depreciationPerYear: 0.1, maxDepreciation: 0.5, minPremium: 900 },
+    defaultSumInsured: 0,
+    defaultTermYears: 1,
+  },
+  {
+    code: "TRAVEL-INTL",
+    category: "travel",
+    name: "International Travel Protect",
+    insurer: "Suraksha General",
+    description: "Annual multi-trip travel cover for medical emergencies, trip delays and lost baggage abroad.",
+    benefits: ["Medical cover up to $100,000", "Trip cancellation and delay", "Lost passport and baggage"],
+    eligibility: { minAge: 18, maxAge: 70 },
+    pricing: { kind: "per_thousand", ratePerThousand: 1.5, ageBands: [{ upTo: 40, factor: 1 }, { upTo: 60, factor: 1.6 }, { upTo: 70, factor: 2.5 }] },
+    defaultSumInsured: 1_000_000,
+    defaultTermYears: 1,
+  },
+  {
+    code: "HOME-SHIELD",
+    category: "home",
+    name: "Home Shield",
+    insurer: "Kavach General",
+    description: "Covers home structure and contents against fire, burglary, floods and earthquakes.",
+    benefits: ["Structure and contents covered", "Burglary and theft", "Temporary accommodation expenses"],
+    eligibility: { minAge: 21, maxAge: 75, minIncome: 300_000 },
+    pricing: { kind: "per_thousand", ratePerThousand: 0.6, ageBands: [{ upTo: 120, factor: 1 }] },
+    defaultSumInsured: 2_500_000,
+    defaultTermYears: 1,
+  },
+];
