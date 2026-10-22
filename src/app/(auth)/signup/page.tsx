@@ -6,8 +6,8 @@ export default function SignupPage() {
     <div className="space-y-6">
       <Logo className="lg:hidden" />
       <div>
-        <h1 className="text-2xl font-semibold tracking-tight">Create your agent account</h1>
-        <p className="mt-1 text-sm text-slate-500">Start selling in under a minute.</p>
+        <h1 className="text-2xl font-semibold tracking-tight text-fg">Create your agent account</h1>
+        <p className="mt-1 text-sm text-fg-muted">Start selling in under a minute.</p>
       </div>
       <SignupForm />
     </div>
