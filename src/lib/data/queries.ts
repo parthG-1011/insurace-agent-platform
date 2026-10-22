@@ -26,15 +26,22 @@ export async function getCustomerForAgent(agentId: number, customerId: number) {
   return row ?? null;
 }
 
+/** The search term as typed, trimmed. Undefined/blank means "no filter". */
+export const searchTerm = (search?: string): string | undefined => search?.trim() || undefined;
+
+/** LIKE needle for phone matching: digits only, falling back to the raw term when it has none. */
+export const phoneSearchNeedle = (term?: string): string | undefined =>
+  term ? `%${term.replace(/\D/g, "") || term}%` : undefined;
+
 export async function listCustomersForAgent(agentId: number, search?: string) {
-  const term = search?.trim();
+  const term = search ? searchTerm(search) : undefined;
   const rows = await db()
     .select()
     .from(customers)
     .where(
       and(
         eq(customers.agentId, agentId),
-        term ? or(ilike(customers.name, `%${term}%`), ilike(customers.phone, `%${term.replace(/\D/g, "") || term}%`), ilike(customers.email, `%${term}%`)) : undefined,
+        term ? or(ilike(customers.name, `%${term}%`), ilike(customers.phone, phoneSearchNeedle(term)!), ilike(customers.email, `%${term}%`)) : undefined,
       ),
     )
     .orderBy(desc(customers.createdAt));
