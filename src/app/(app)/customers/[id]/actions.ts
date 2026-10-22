@@ -5,16 +5,63 @@ import { revalidatePath } from "next/cache";
 import { requireAgent } from "@/lib/auth/current";
 import { getCustomerForAgent, getProposalBundleForAgent, toProfile } from "@/lib/data/queries";
 import { db } from "@/lib/db";
-import { products, proposals } from "@/lib/db/schema";
+import { customers, products, proposals } from "@/lib/db/schema";
 import { getAppUrl } from "@/lib/env";
 import { checkEligibility, quoteProduct } from "@/lib/insurance/eligibility";
 import { createPaymentLink, razorpayConfigured } from "@/lib/payments/razorpay";
 import { reconcileProposal } from "@/lib/policy/activate";
 import { newPublicToken, proposalReference } from "@/lib/tokens";
+import { fieldErrors, formValues } from "@/lib/validation/auth";
+import { customerSchema, normaliseVehicleFields } from "@/lib/validation/customer";
 
 export type ActionResult = { ok: true; message?: string } | { ok: false; error: string };
 
+/**
+ * ActionResult plus the field-level detail a form needs. `useActionState` reads this directly,
+ * so a rejected save comes back with the highlighted fields instead of a bare string.
+ */
+export type UpdateCustomerResult =
+  | { ok: true; message: string; values?: Record<string, string> }
+  | { ok: false; error: string; fieldErrors?: Record<string, string>; values?: Record<string, string> };
+
+/** What useActionState holds: no result yet, or the one the last submit produced. */
+export type UpdateCustomerState = UpdateCustomerResult | undefined;
+
 const fail = (err: unknown): ActionResult => ({ ok: false, error: err instanceof Error ? err.message : "Something went wrong" });
+
+/**
+ * Corrections must never blank a required field: the schema is the one the customer was created
+ * with, so an incomplete payload is rejected rather than quietly erasing their data. Only
+ * customer facts are stored — premiums are always recomputed server-side.
+ */
+export async function updateCustomerAction(customerId: number, _: UpdateCustomerState, formData: FormData): Promise<UpdateCustomerResult> {
+  const agent = await requireAgent();
+  const customer = await getCustomerForAgent(agent.id, customerId);
+  if (!customer) return { ok: false, error: "Customer not found" };
+
+  const parsed = customerSchema().safeParse(Object.fromEntries(formData));
+  if (!parsed.success) {
+    return { ok: false, error: "Please fix the highlighted fields.", fieldErrors: fieldErrors(parsed.error), values: formValues(formData) };
+  }
+
+  // Existing quotes were priced from the old facts; they keep that price and are never rewritten.
+  const [existing] = await db()
+    .select({ id: proposals.id })
+    .from(proposals)
+    .where(eq(proposals.customerId, customer.id))
+    .limit(1);
+
+  await db()
+    .update(customers)
+    .set({ ...parsed.data, ...normaliseVehicleFields(parsed.data) })
+    .where(eq(customers.id, customer.id));
+  revalidatePath(`/customers/${customer.id}`);
+
+  const message = existing
+    ? "Customer details updated. An existing quote keeps its original price — review it before sending again."
+    : "Customer details updated.";
+  return { ok: true, message, values: formValues(formData) };
+}
 
 export async function selectPlanAction(customerId: number, productId: number): Promise<ActionResult> {
   const agent = await requireAgent();
@@ -98,6 +145,7 @@ export async function refreshPaymentStatusAction(proposalId: number): Promise<Ac
   try {
     const r = await reconcileProposal(b.proposal);
     revalidatePath(`/customers/${b.customer.id}`);
+    revalidatePath("/dashboard");
     if (r.status === "policy_active") return { ok: true, message: "Payment received. The policy is active." };
     return { ok: true, message: "No payment yet. The customer hasn't completed checkout." };
   } catch (err) {

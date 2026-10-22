@@ -39,9 +39,21 @@ export function customerSchema(today = new Date()) {
         }
       }
     })
-    .transform((c) =>
-      c.vehicleType === "none" ? { ...c, vehicleRegYear: null, vehicleValue: null } : c,
-    );
+    .transform((c) => ({ ...c, ...normaliseVehicleFields(c) }));
+}
+
+/**
+ * Vehicle facts are only meaningful when a vehicle is owned. A removed vehicle must clear
+ * them, or checkEligibility keeps seeing stale data and motor plans stay "available".
+ */
+export function normaliseVehicleFields(v: {
+  vehicleType: string;
+  vehicleRegYear: number | null;
+  vehicleValue: number | null;
+}) {
+  return v.vehicleType === "none"
+    ? { vehicleRegYear: null, vehicleValue: null }
+    : { vehicleRegYear: v.vehicleRegYear, vehicleValue: v.vehicleValue };
 }
 
 export type CustomerInput = z.output<ReturnType<typeof customerSchema>>;

@@ -105,6 +105,50 @@ export const listEmailsForAgent = (agentId: number) =>
     .orderBy(desc(emailLog.createdAt))
     .limit(100);
 
+/** Statuses still awaiting money. Won business (paid / policy_active) never enters the queue. */
+export const FOLLOW_UP_STATUSES = ["quoted", "shared", "payment_pending"] as const;
+
+export type FollowUpStatus = (typeof FOLLOW_UP_STATUSES)[number];
+
+/** The literal next step for each open status, shown as the queue's single primary action. */
+export const FOLLOW_UP_ACTION: Record<FollowUpStatus, string> = {
+  quoted: "Send proposal",
+  shared: "Chase payment",
+  payment_pending: "Check payment",
+};
+
+/** Whole days a proposal has been silent. Same-day activity is 0, never negative. */
+export const followUpDays = (updatedAt: Date, now: Date) =>
+  Math.max(0, Math.floor((now.getTime() - new Date(updatedAt).getTime()) / 86_400_000));
+
+export type FollowUpTone = "fresh" | "waiting" | "stale";
+
+export function followUpTone(days: number): FollowUpTone {
+  if (days >= 3) return "stale";
+  if (days >= 1) return "waiting";
+  return "fresh";
+}
+
+/** Open proposals, oldest first — the longest-silent deal is the one being forgotten. */
+export async function listFollowUps(agentId: number) {
+  const rows = await db()
+    .select({
+      proposal: proposals,
+      customerName: customers.name,
+      customerId: customers.id,
+      customerEmail: customers.email,
+      customerPhone: customers.phone,
+      productName: products.name,
+      productInsurer: products.insurer,
+    })
+    .from(proposals)
+    .innerJoin(customers, eq(proposals.customerId, customers.id))
+    .innerJoin(products, eq(proposals.productId, products.id))
+    .where(and(eq(proposals.agentId, agentId), inArray(proposals.status, [...FOLLOW_UP_STATUSES])))
+    .orderBy(asc(proposals.updatedAt));
+  return rows;
+}
+
 export async function getDashboard(agentId: number) {
   const [[customerCount], statusCounts, recent] = await Promise.all([
     db().select({ n: count() }).from(customers).where(eq(customers.agentId, agentId)),
