@@ -1,6 +1,8 @@
-import { and, asc, count, desc, eq, ilike, inArray, or } from "drizzle-orm";
+import { and, asc, count, desc, eq, exists, ilike, inArray, notExists, or, sql, type SQL } from "drizzle-orm";
+import { alias } from "drizzle-orm/pg-core";
 import { db } from "@/lib/db";
-import { agents, customers, emailLog, products, proposals, type Customer } from "@/lib/db/schema";
+import { agents, customers, emailLog, products, proposals, type Customer, type ProposalStatus } from "@/lib/db/schema";
+import { STATUS_LABEL, STATUS_STEPS } from "@/lib/insurance/status";
 import type { CustomerProfile } from "@/lib/insurance/types";
 
 export const toProfile = (c: Customer): CustomerProfile => ({
@@ -14,6 +16,25 @@ export const toProfile = (c: Customer): CustomerProfile => ({
   vehicleValue: c.vehicleValue,
 });
 
+export const NO_PLAN_FILTER = "none";
+
+/** Parsed form of the ?status= search param: All | a real status | the no-plan bucket. */
+export type CustomerStatusFilter = ProposalStatus | typeof NO_PLAN_FILTER;
+
+/** Validates a raw ?status= value. Unknown/array/empty input falls back to "All" (null). */
+export const parseCustomerStatusFilter = (raw?: string | string[] | null): CustomerStatusFilter | null => {
+  const v = typeof raw === "string" ? raw.trim() : "";
+  if (v === NO_PLAN_FILTER) return NO_PLAN_FILTER;
+  return STATUS_STEPS.some((s) => s.status === v) ? (v as ProposalStatus) : null;
+};
+
+/** Ordered options for the <select>: "All", "No plan selected", then one per STATUS_STEPS entry. */
+export const customerStatusFilterOptions = (): { value: string; label: string }[] => [
+  { value: "", label: "All" },
+  { value: NO_PLAN_FILTER, label: "No plan selected" },
+  ...STATUS_STEPS.map((s) => ({ value: s.status, label: STATUS_LABEL[s.status] })),
+];
+
 export const listActiveProducts = () =>
   db().select().from(products).where(eq(products.isActive, true)).orderBy(asc(products.id));
 
@@ -26,8 +47,31 @@ export async function getCustomerForAgent(agentId: number, customerId: number) {
   return row ?? null;
 }
 
-export async function listCustomersForAgent(agentId: number, search?: string) {
+export async function listCustomersForAgent(agentId: number, search?: string, status?: CustomerStatusFilter | null) {
   const term = search?.trim();
+  // "latest" is max(updatedAt) per customer, matching the orderBy(desc(proposals.updatedAt))
+  // used for the latest-proposal Map below, so a badge can never contradict the filter.
+  let statusCondition: SQL | undefined;
+  if (status === NO_PLAN_FILTER) {
+    statusCondition = notExists(db().select({ one: sql`1` }).from(proposals).where(eq(proposals.customerId, customers.id)));
+  } else if (status) {
+    const latest = alias(proposals, "latest");
+    statusCondition = exists(
+      db()
+        .select({ one: sql`1` })
+        .from(latest)
+        .where(
+          and(
+            eq(latest.customerId, customers.id),
+            eq(latest.status, status),
+            eq(
+              latest.updatedAt,
+              sql`(select max(${proposals.updatedAt}) from ${proposals} where ${proposals.customerId} = ${customers.id})`,
+            ),
+          ),
+        ),
+    );
+  }
   const rows = await db()
     .select()
     .from(customers)
@@ -35,6 +79,7 @@ export async function listCustomersForAgent(agentId: number, search?: string) {
       and(
         eq(customers.agentId, agentId),
         term ? or(ilike(customers.name, `%${term}%`), ilike(customers.phone, `%${term.replace(/\D/g, "") || term}%`), ilike(customers.email, `%${term}%`)) : undefined,
+        statusCondition,
       ),
     )
     .orderBy(desc(customers.createdAt));
