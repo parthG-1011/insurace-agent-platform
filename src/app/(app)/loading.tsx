@@ -14,9 +14,15 @@ export default function AppLoading() {
       </div>
       <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
         {[0, 1, 2, 3].map((i) => (
-          <div key={i} className="space-y-2 rounded-card border border-line bg-surface p-4">
+          // Same geometry as `StatCard` — a 3px left rule, label, figure, hint —
+          // so the swap into real tiles changes only the greys.
+          <div
+            key={i}
+            className="space-y-2 rounded-card border border-line border-l-[3px] border-l-line-strong bg-surface p-4"
+          >
             <Skeleton className="h-3 w-24" />
             <Skeleton className="h-7 w-12" />
+            <Skeleton className="h-3 w-28" />
           </div>
         ))}
       </div>
