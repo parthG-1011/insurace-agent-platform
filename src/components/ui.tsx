@@ -23,6 +23,13 @@ export const buttonStyles = {
 export const inputStyles =
   "block w-full rounded-control border border-line-strong bg-surface px-3 py-2 text-sm text-fg placeholder:text-fg-subtle focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20";
 
+/**
+ * The error and hint ids are the anchor for a form's accessibility wiring: a
+ * field passes `aria-describedby={error ? `${name}-error` : `${name}-hint`}` to
+ * its control, so the reason a value was rejected is announced on focus rather
+ * than only being visible next to it. Only one of the two is ever rendered, so
+ * the describedby target always exists.
+ */
 export function Field({
   label,
   name,
@@ -47,7 +54,7 @@ export function Field({
           {error}
         </p>
       ) : hint ? (
-        <p id={`${name}-hint`} className="text-xs text-fg-muted">
+        <p id={`${name}-hint`} className="text-xs text-fg-subtle">
           {hint}
         </p>
       ) : null}

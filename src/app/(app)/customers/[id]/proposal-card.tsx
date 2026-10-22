@@ -39,43 +39,46 @@ export function ProposalCard({
 
   return (
     <Card className="overflow-hidden">
-      <div className="flex items-start justify-between gap-4 p-5">
-        <div>
-          <div className="flex items-center gap-2">
+      <div className="flex flex-wrap items-start justify-between gap-x-4 gap-y-3 p-5">
+        <div className="min-w-0">
+          <div className="flex flex-wrap items-center gap-2">
             <Badge tone="blue">{CATEGORY_LABEL[product.category]}</Badge>
-            <span className="font-mono text-xs text-slate-400">{proposalReference(proposal.id)}</span>
+            <span className="font-mono text-xs text-fg-subtle">{proposalReference(proposal.id)}</span>
           </div>
-          <h3 className="mt-2 text-lg font-semibold">{product.name}</h3>
-          <p className="text-sm text-slate-500">
+          <h3 className="mt-2 text-lg font-semibold text-fg">{product.name}</h3>
+          <p className="text-sm text-fg-muted">
             {product.insurer} · Cover {formatCover(proposal.sumInsured)} · {formatTerm(proposal.termYears)}
           </p>
         </div>
-        <div className="text-right">
-          <p className="text-2xl font-semibold tabular-nums">{formatINR(proposal.totalPremium)}</p>
-          <p className="text-xs text-slate-500">
+        <div className="sm:text-right">
+          <p className="amount text-2xl font-semibold text-fg">{formatINR(proposal.totalPremium)}</p>
+          <p className="amount text-xs text-fg-muted">
             per year · {formatINR(proposal.basePremium)} + {formatINR(proposal.gst)} GST
           </p>
         </div>
       </div>
 
-      <div className="border-t border-slate-100 px-5 py-3">
+      {/* The five status steps are ~450px wide and do not fit 375px. The Card
+          clips its overflow, so this row scrolls sideways rather than silently
+          hiding the last steps. StatusStepper itself is unchanged. */}
+      <div className="overflow-x-auto border-t border-line px-5 py-3">
         <StatusStepper status={proposal.status} />
       </div>
 
       {active ? (
-        <div className="space-y-3 border-t border-slate-100 bg-emerald-50/60 p-5 text-sm">
-          <p className="font-medium text-emerald-800">
+        <div className="space-y-3 border-t border-line bg-success/5 p-5 text-sm">
+          <p className="font-medium text-success">
             Policy active · <span className="font-mono">{proposal.policyNumber}</span> · started{" "}
             {proposal.policyStartDate && formatDate(proposal.policyStartDate)}
           </p>
-          <p className="text-emerald-900/80">
+          <p className="text-fg-muted">
             Paid {proposal.paidAt && formatDateTime(proposal.paidAt)}
             {proposal.razorpayPaymentId && <> · Razorpay payment {proposal.razorpayPaymentId}</>}
           </p>
           {email && (
-            <p className="flex items-center gap-2 text-slate-700">
+            <p className="flex flex-wrap items-center gap-2 text-fg-muted">
               Confirmation email to {email.to}: <Badge tone={EMAIL_TONE[email.status]}>{email.status}</Badge>
-              {email.error && <span className="text-xs text-slate-500">({email.error})</span>}
+              {email.error && <span className="text-xs text-fg-subtle">({email.error})</span>}
             </p>
           )}
           <a href={pdfUrl} target="_blank" rel="noopener noreferrer" className={buttonStyles.secondary}>
@@ -83,9 +86,11 @@ export function ProposalCard({
           </a>
         </div>
       ) : (
-        <div className="grid grid-cols-2 divide-x divide-slate-100 border-t border-slate-100">
+        /* The two stages really are a sequence, so the number carries real
+           information here — it is the step the agent is on. */
+        <div className="grid grid-cols-1 divide-y divide-line border-t border-line md:grid-cols-2 md:divide-x md:divide-y-0">
           <div className="space-y-3 p-5">
-            <p className="text-xs font-semibold uppercase tracking-wide text-slate-500">1 · Share the proposal</p>
+            <StepLabel n={1}>Share the proposal</StepLabel>
             <div className="flex flex-wrap gap-2">
               <a href={pdfUrl} target="_blank" rel="noopener noreferrer" className={buttonStyles.secondary}>
                 View PDF
@@ -99,7 +104,7 @@ export function ProposalCard({
             </div>
           </div>
           <div className="space-y-3 p-5">
-            <p className="text-xs font-semibold uppercase tracking-wide text-slate-500">2 · Collect payment</p>
+            <StepLabel n={2}>Collect payment</StepLabel>
             {proposal.razorpayLinkUrl ? (
               <>
                 <div className="flex flex-wrap gap-2">
@@ -115,7 +120,7 @@ export function ProposalCard({
                     Check payment
                   </ActionButton>
                 </div>
-                <div className="flex items-center gap-2 text-xs text-slate-500">
+                <div className="flex items-center gap-2 text-xs text-fg-muted">
                   <span className="truncate font-mono">{proposal.razorpayLinkUrl}</span>
                   <CopyButton value={proposal.razorpayLinkUrl} />
                 </div>
@@ -133,5 +138,16 @@ export function ProposalCard({
         </div>
       )}
     </Card>
+  );
+}
+
+function StepLabel({ n, children }: { n: number; children: React.ReactNode }) {
+  return (
+    <p className="flex items-center gap-2 text-xs font-semibold text-fg-muted">
+      <span className="grid h-4.5 w-4.5 place-items-center rounded-pill bg-primary-soft text-[10px] font-semibold text-primary">
+        {n}
+      </span>
+      {children}
+    </p>
   );
 }
