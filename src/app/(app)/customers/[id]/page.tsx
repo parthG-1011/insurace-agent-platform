@@ -9,6 +9,7 @@ import { ageOn, evaluateProducts } from "@/lib/insurance/eligibility";
 import { CATEGORY_LABEL } from "@/lib/insurance/types";
 import { formatPhone } from "@/lib/phone";
 import { selectPlanAction } from "./actions";
+import { CustomerEditProvider, EditCustomerFormSection, EditDetailsToggle } from "./edit-customer-form";
 import { ProposalCard } from "./proposal-card";
 
 const VEHICLE_LABEL = { car: "Car", two_wheeler: "Two-wheeler", none: "None" };
@@ -44,9 +45,31 @@ export default async function CustomerPage({ params }: PageProps<"/customers/[id
     ],
   ];
 
+  // Pre-fill the editor from the stored row. The phone is stored normalised; the form's
+  // schema re-normalises it, so the agent sees the familiar local format.
+  const editValues: Record<string, string> = {
+    name: customer.name,
+    phone: formatPhone(customer.phone),
+    email: customer.email,
+    dob: customer.dob,
+    gender: customer.gender,
+    city: customer.city,
+    annualIncome: String(customer.annualIncome),
+    dependants: String(customer.dependants),
+    smoker: customer.smoker ? "on" : "",
+    preExistingCondition: customer.preExistingCondition ? "on" : "",
+    vehicleType: customer.vehicleType,
+    vehicleRegYear: customer.vehicleRegYear == null ? "" : String(customer.vehicleRegYear),
+    vehicleValue: customer.vehicleValue == null ? "" : String(customer.vehicleValue),
+  };
+
   return (
-    <>
-      <PageHeader title={customer.name} description={`Customer since ${formatDate(customer.createdAt)}`} />
+    <CustomerEditProvider customerId={customer.id} values={editValues}>
+      <PageHeader
+        title={customer.name}
+        description={`Customer since ${formatDate(customer.createdAt)}`}
+        actions={<EditDetailsToggle />}
+      />
 
       <Card className="grid grid-cols-3 gap-x-8 gap-y-4 p-5 text-sm">
         {facts.map(([label, value]) => (
@@ -56,6 +79,8 @@ export default async function CustomerPage({ params }: PageProps<"/customers/[id
           </div>
         ))}
       </Card>
+
+      <EditCustomerFormSection />
 
       {proposalRows.length > 0 && (
         <section className="mt-8 space-y-4">
@@ -135,6 +160,6 @@ export default async function CustomerPage({ params }: PageProps<"/customers/[id
           </details>
         )}
       </section>
-    </>
+    </CustomerEditProvider>
   );
 }
