@@ -2,15 +2,16 @@ import Link from "next/link";
 import { StatusBadge } from "@/components/status";
 import { buttonStyles, Card, inputStyles, PageHeader } from "@/components/ui";
 import { requireAgent } from "@/lib/auth/current";
-import { listCustomersForAgent } from "@/lib/data/queries";
+import { customerStatusFilterOptions, listCustomersForAgent, parseCustomerStatusFilter } from "@/lib/data/queries";
 import { formatDate } from "@/lib/format";
 import { formatPhone } from "@/lib/phone";
 
 export default async function CustomersPage({ searchParams }: PageProps<"/customers">) {
   const agent = await requireAgent();
-  const { q } = await searchParams;
+  const { q, status: rawStatus } = await searchParams;
   const search = typeof q === "string" ? q : "";
-  const rows = await listCustomersForAgent(agent.id, search);
+  const statusFilter = parseCustomerStatusFilter(rawStatus);
+  const rows = await listCustomersForAgent(agent.id, search, statusFilter);
 
   return (
     <>
@@ -19,15 +20,29 @@ export default async function CustomersPage({ searchParams }: PageProps<"/custom
         description="Everyone you've spoken to, and where they are in the journey."
         actions={<Link href="/customers/new" className={buttonStyles.primary}>+ New customer</Link>}
       />
-      <form className="mb-4 flex gap-2">
-        <input name="q" defaultValue={search} placeholder="Search by name, phone or email" className={`${inputStyles} max-w-sm`} />
+      <form method="get" action="/customers" className="mb-4 flex flex-wrap items-end gap-2">
+        <div className="flex-1">
+          <input name="q" defaultValue={search} placeholder="Search by name, phone or email" className={`${inputStyles} max-w-sm`} />
+        </div>
+        <select name="status" defaultValue={statusFilter ?? ""} className={`${inputStyles} w-auto max-w-56`} aria-label="Filter by latest proposal status">
+          {customerStatusFilterOptions().map((o) => (
+            <option key={o.value || "all"} value={o.value}>{o.label}</option>
+          ))}
+        </select>
         <button className={buttonStyles.secondary}>Search</button>
       </form>
       <Card>
         {rows.length === 0 ? (
-          <p className="px-5 py-10 text-center text-sm text-slate-500">
-            {search ? "No customers match your search." : "No customers yet."}
-          </p>
+          <div className="px-5 py-10 text-center text-sm text-slate-500">
+            {statusFilter || search ? (
+              <>
+                <p>No customers match your filters.</p>
+                <Link href="/customers" className="mt-2 inline-block font-medium text-blue-700 hover:underline">Clear filters</Link>
+              </>
+            ) : (
+              <p>No customers yet.</p>
+            )}
+          </div>
         ) : (
           <table className="w-full text-sm">
             <thead className="text-left text-xs uppercase tracking-wide text-slate-500">
