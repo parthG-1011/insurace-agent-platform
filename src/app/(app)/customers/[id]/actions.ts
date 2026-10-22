@@ -98,6 +98,7 @@ export async function refreshPaymentStatusAction(proposalId: number): Promise<Ac
   try {
     const r = await reconcileProposal(b.proposal);
     revalidatePath(`/customers/${b.customer.id}`);
+    revalidatePath("/dashboard");
     if (r.status === "policy_active") return { ok: true, message: "Payment received. The policy is active." };
     return { ok: true, message: "No payment yet. The customer hasn't completed checkout." };
   } catch (err) {
