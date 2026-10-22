@@ -7,12 +7,12 @@ export default async function LoginPage({ searchParams }: PageProps<"/login">) {
     <div className="space-y-6">
       <Logo className="lg:hidden" />
       <div>
-        <h1 className="text-2xl font-semibold tracking-tight">Sign in</h1>
-        <p className="mt-1 text-sm text-slate-500">Welcome back. Sign in to your agent account.</p>
+        <h1 className="text-2xl font-semibold tracking-tight text-fg">Sign in</h1>
+        <p className="mt-1 text-sm text-fg-muted">Welcome back. Sign in to your agent account.</p>
       </div>
-      <div className="rounded-lg border border-blue-200 bg-blue-50 px-3 py-2.5 text-sm text-blue-900">
-        <p className="font-medium">Demo account</p>
-        <p className="font-mono text-xs">demo@agentdesk.in / Demo@1234</p>
+      <div className="rounded-card border border-line bg-primary-soft px-3.5 py-3">
+        <p className="text-sm font-medium text-fg">Demo account</p>
+        <p className="mt-0.5 font-mono text-xs text-fg-muted">demo@agentdesk.in / Demo@1234</p>
       </div>
       <LoginForm next={typeof next === "string" ? next : undefined} />
     </div>

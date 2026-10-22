@@ -3,8 +3,69 @@
 @theme inline {
   --font-sans: var(--font-geist-sans), ui-sans-serif, system-ui, sans-serif;
   --font-mono: var(--font-geist-mono), ui-monospace, monospace;
+
+  --color-canvas: light-dark(#F7F6F3, #101418);
+  --color-surface: light-dark(#FFFFFF, #171B21);
+  --color-raised: light-dark(#FCFBF9, #1E242C);
+  --color-overlay: light-dark(#EFEDE8, #262D37);
+
+  --color-line: light-dark(#E5E2DB, #2A313B);
+  --color-line-strong: light-dark(#D3CFC5, #3A424E);
+
+  --color-fg: light-dark(#1B1A17, #E9E7E2);
+  --color-fg-muted: light-dark(#6B6862, #9AA1AC);
+  --color-fg-subtle: light-dark(#918D85, #6E7681);
+
+  --color-primary: light-dark(#16324F, #7FA8D0);
+  --color-primary-hover: light-dark(#0F2740, #96B8D9);
+  --color-primary-fg: light-dark(#FFFFFF, #0C1420);
+  --color-primary-soft: light-dark(#EAF0F6, #1B2733);
+
+  --color-accent: light-dark(#B4762C, #D9A15C);
+  --color-accent-soft: light-dark(#F6EFE3, #2A2118);
+
+  --color-success: light-dark(#1F6B4B, #5FB48B);
+  --color-warning: light-dark(#8A6216, #D0A44C);
+  --color-danger: light-dark(#A32E2E, #E08A85);
+  --color-info: light-dark(#1F5A80, #7FB0D4);
+
+  --radius-card: 10px;
+  --radius-control: 8px;
+  --radius-pill: 999px;
 }
 
-body {
-  @apply bg-slate-50 text-slate-900;
+/* `light-dark()` resolves against the used color-scheme, so `.dark` is the
+   only thing that has to change to flip the whole product between themes. */
+:root {
+  color-scheme: light;
+}
+
+.dark {
+  color-scheme: dark;
+}
+
+@layer base {
+  body {
+    @apply bg-canvas text-fg font-sans;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  :focus-visible {
+    @apply outline-2 outline-offset-2 outline-primary;
+  }
+}
+
+/* Tabular figures for every rupee amount, so digits line up column-wise. */
+@utility amount {
+  font-variant-numeric: tabular-nums;
+  letter-spacing: -0.01em;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+  }
 }

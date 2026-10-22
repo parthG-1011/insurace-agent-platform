@@ -1,4 +1,6 @@
 import Link from "next/link";
+import { Check, Shield } from "@/components/icons";
+import { EmptyState } from "@/components/primitives";
 import { Badge, Card, cx, PageHeader } from "@/components/ui";
 import { listActiveProducts } from "@/lib/data/queries";
 import { formatCover, formatTerm } from "@/lib/format";
@@ -19,52 +21,77 @@ export default async function ProductsPage({ searchParams }: PageProps<"/product
   return (
     <>
       <PageHeader title="Products" description="Every plan you can offer, across insurers and categories." />
-      <div className="mb-6 flex gap-2">
-        {tabs.map((t) => (
-          <Link
-            key={t.label}
-            href={t.key ? `/products?category=${t.key}` : "/products"}
-            className={cx(
-              "rounded-full px-3.5 py-1.5 text-sm font-medium",
-              active === t.key ? "bg-blue-700 text-white" : "bg-white text-slate-600 ring-1 ring-slate-200 hover:bg-slate-50",
-            )}
-          >
-            {t.label} <span className="opacity-70">{t.count}</span>
-          </Link>
-        ))}
+
+      {/* Segmented control: a filter is a control with one selected position, not a row
+          of competing pills. Below `sm` it scrolls sideways — six categories wrapped
+          into a tall stack pushed the catalogue off the fold on a phone. */}
+      <div className="mb-6 -mx-1 overflow-x-auto px-1">
+        <nav aria-label="Product category" className="flex w-max border border-line bg-raised rounded-[8px] p-1">
+          {tabs.map((t) => (
+            <Link
+              key={t.label}
+              href={t.key ? `/products?category=${t.key}` : "/products"}
+              aria-current={active === t.key ? "page" : undefined}
+              className={cx(
+                "rounded-[6px] px-3 py-1.5 text-sm whitespace-nowrap transition-colors",
+                active === t.key ? "bg-surface text-fg font-medium" : "text-fg-muted hover:text-fg",
+              )}
+            >
+              {t.label} <span className="text-fg-subtle">{t.count}</span>
+            </Link>
+          ))}
+        </nav>
       </div>
-      <div className="grid grid-cols-2 gap-4 xl:grid-cols-3">
-        {shown.map((p) => (
-          <Card key={p.id} className="flex flex-col p-5">
-            <div className="flex items-start justify-between gap-2">
-              <Badge tone="blue">{CATEGORY_LABEL[p.category]}</Badge>
-              <span className="text-xs text-slate-500">{p.insurer}</span>
-            </div>
-            <h3 className="mt-3 font-semibold">{p.name}</h3>
-            <p className="mt-1 text-sm text-slate-600">{p.description}</p>
-            <ul className="mt-3 space-y-1 text-sm text-slate-700">
-              {p.benefits.map((b) => (
-                <li key={b} className="flex gap-2">
-                  <span className="text-emerald-600">✓</span>
-                  {b}
-                </li>
-              ))}
-            </ul>
-            <div className="mt-auto pt-4">
-              <div className="flex flex-wrap gap-1.5 border-t border-slate-100 pt-3">
-                {describeEligibility(p.eligibility).map((e) => (
-                  <Badge key={e}>{e}</Badge>
-                ))}
+
+      {shown.length === 0 ? (
+        <Card>
+          <EmptyState
+            icon={<Shield />}
+            title="No plans in this category"
+            description="Nothing is published for this filter right now. Try another category, or check back once plans are added."
+            action={
+              active ? (
+                <Link href="/products" className="text-sm font-medium text-primary hover:underline">
+                  See all products
+                </Link>
+              ) : undefined
+            }
+          />
+        </Card>
+      ) : (
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-3">
+          {shown.map((p) => (
+            <Card key={p.id} className="flex flex-col p-5">
+              <div className="flex items-start justify-between gap-2">
+                <Badge tone="blue">{CATEGORY_LABEL[p.category]}</Badge>
+                <span className="text-xs text-fg-muted">{p.insurer}</span>
               </div>
-              <p className="mt-2 text-xs text-slate-500">
-                {p.pricing.kind === "vehicle"
-                  ? "Cover based on the vehicle's insured declared value · 1 year"
-                  : `Cover up to ${formatCover(p.defaultSumInsured)} · ${formatTerm(p.defaultTermYears)}`}
-              </p>
-            </div>
-          </Card>
-        ))}
-      </div>
+              <h3 className="mt-3 font-semibold text-fg">{p.name}</h3>
+              <p className="mt-1 text-sm text-fg-muted">{p.description}</p>
+              <ul className="mt-3 space-y-1 text-sm text-fg">
+                {p.benefits.map((b) => (
+                  <li key={b} className="flex items-start gap-2">
+                    <Check className="mt-0.5 h-4 w-4 shrink-0 text-success" />
+                    {b}
+                  </li>
+                ))}
+              </ul>
+              <div className="mt-auto pt-4">
+                <div className="flex flex-wrap gap-1.5 border-t border-line pt-3">
+                  {describeEligibility(p.eligibility).map((e) => (
+                    <Badge key={e}>{e}</Badge>
+                  ))}
+                </div>
+                <p className="mt-2 text-xs text-fg-muted">
+                  {p.pricing.kind === "vehicle"
+                    ? "Cover based on the vehicle's insured declared value · 1 year"
+                    : `Cover up to ${formatCover(p.defaultSumInsured)} · ${formatTerm(p.defaultTermYears)}`}
+                </p>
+              </div>
+            </Card>
+          ))}
+        </div>
+      )}
     </>
   );
 }

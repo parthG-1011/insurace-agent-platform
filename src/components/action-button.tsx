@@ -3,25 +3,33 @@
 import { useTransition, type ReactNode } from "react";
 import { toast } from "sonner";
 import type { ActionResult } from "@/app/(app)/customers/[id]/actions";
-import { buttonStyles } from "./ui";
+import { Button, type ButtonVariant, type ButtonSize } from "./primitives";
+import { cx } from "./ui";
 
 export function ActionButton({
   action,
   children,
   pendingLabel = "Working…",
   variant = "secondary",
+  size = "md",
+  className,
 }: {
   action: () => Promise<ActionResult>;
   children: ReactNode;
   pendingLabel?: string;
-  variant?: keyof typeof buttonStyles;
+  variant?: ButtonVariant;
+  size?: ButtonSize;
+  className?: string;
 }) {
   const [pending, startTransition] = useTransition();
   return (
-    <button
+    <Button
       type="button"
+      variant={variant}
+      size={size}
       disabled={pending}
-      className={buttonStyles[variant]}
+      aria-busy={pending}
+      className={className}
       onClick={() =>
         startTransition(async () => {
           const result = await action();
@@ -31,9 +39,20 @@ export function ActionButton({
       }
     >
       {pending ? pendingLabel : children}
-    </button>
+    </Button>
   );
 }
+
+/* The anchor below cannot be a `<Button>` (it has to be a real link for
+   right-click, middle-click and the browser status bar), so the two anchor
+   treatments are composed from the same tokens as the button variants. */
+const controlBase = cx(
+  "inline-flex h-9.5 items-center justify-center gap-2 rounded-control px-3.5 text-sm font-medium transition-colors",
+  "focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary",
+);
+
+const whatsappLink = cx(controlBase, "bg-success text-white hover:brightness-95");
+const ghostButton = cx(controlBase, "text-fg-muted hover:bg-overlay hover:text-fg");
 
 /** Opens WhatsApp synchronously (so popup blockers allow it), then records the share. */
 export function WhatsAppButton({
@@ -51,7 +70,7 @@ export function WhatsAppButton({
       href={href}
       target="_blank"
       rel="noopener noreferrer"
-      className={buttonStyles.whatsapp}
+      className={whatsappLink}
       onClick={() => onShare && startTransition(async () => void (await onShare()))}
     >
       <WhatsAppIcon />
@@ -64,7 +83,7 @@ export function CopyButton({ value, label = "Copy link" }: { value: string; labe
   return (
     <button
       type="button"
-      className={buttonStyles.ghost}
+      className={ghostButton}
       onClick={async () => {
         await navigator.clipboard.writeText(value);
         toast.success("Copied to clipboard");
