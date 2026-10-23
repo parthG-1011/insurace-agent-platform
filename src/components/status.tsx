@@ -17,13 +17,13 @@ export function StatusStepper({ status }: { status: ProposalStatus }) {
             <span
               className={cx(
                 "flex items-center gap-1.5 rounded-full px-2 py-1 font-medium",
-                done ? "bg-emerald-50 text-emerald-700" : "bg-slate-100 text-slate-400",
+                done ? "bg-success-tint text-success-ink" : "bg-elevated text-ink-faint",
               )}
             >
-              <span className={cx("h-1.5 w-1.5 rounded-full", done ? "bg-emerald-500" : "bg-slate-300")} />
+              <span className={cx("h-1.5 w-1.5 rounded-full", done ? "bg-success" : "bg-line")} />
               {step.label}
             </span>
-            {i < STATUS_STEPS.length - 1 && <span className={cx("h-px w-3", done ? "bg-emerald-300" : "bg-slate-200")} />}
+            {i < STATUS_STEPS.length - 1 && <span className={cx("h-px w-3", done ? "bg-success/50" : "bg-line")} />}
           </li>
         );
       })}

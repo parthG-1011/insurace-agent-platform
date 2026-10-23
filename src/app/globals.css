@@ -5,6 +5,45 @@
   --font-mono: var(--font-geist-mono), ui-monospace, monospace;
 }
 
+@theme {
+  /* Surfaces */
+  --color-canvas: #0a0f1a;
+  --color-surface: #111827;
+  --color-elevated: #1a2234;
+  --color-line: #263145;
+  --color-line-soft: #1e2739;
+
+  /* Ink */
+  --color-ink: #f1f5f9;
+  --color-ink-muted: #94a3b8;
+  --color-ink-faint: #64748b;
+  --color-ink-strong: #e2e8f0;
+
+  /* Accent */
+  --color-accent: #3b82f6;
+  --color-accent-hover: #60a5fa;
+  --color-accent-ink: #93c5fd;
+
+  /* Status */
+  --color-success: #10b981;
+  --color-success-ink: #6ee7b7;
+  --color-warning: #f59e0b;
+  --color-warning-ink: #fcd34d;
+  --color-danger: #ef4444;
+  --color-danger-ink: #fca5a5;
+
+  /* Dark tints for badges and callouts */
+  --color-accent-tint: #14213a;
+  --color-success-tint: #0c2a22;
+  --color-warning-tint: #2a1f0c;
+  --color-danger-tint: #2c1418;
+  --color-neutral-tint: #1a2234;
+}
+
+:root {
+  color-scheme: dark;
+}
+
 body {
-  @apply bg-slate-50 text-slate-900;
+  @apply bg-canvas text-ink;
 }

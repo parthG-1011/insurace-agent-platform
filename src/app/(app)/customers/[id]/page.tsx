@@ -51,7 +51,7 @@ export default async function CustomerPage({ params }: PageProps<"/customers/[id
       <Card className="grid grid-cols-3 gap-x-8 gap-y-4 p-5 text-sm">
         {facts.map(([label, value]) => (
           <div key={label}>
-            <p className="text-xs text-slate-500">{label}</p>
+            <p className="text-xs text-ink-muted">{label}</p>
             <p className="mt-0.5 font-medium">{value}</p>
           </div>
         ))}
@@ -77,11 +77,11 @@ export default async function CustomerPage({ params }: PageProps<"/customers/[id
       <section className="mt-8">
         <div className="mb-3 flex items-baseline justify-between">
           <h2 className="text-lg font-semibold">Plans {customer.name.split(" ")[0]} qualifies for</h2>
-          <p className="text-sm text-slate-500">{eligible.length} eligible · premiums include 18% GST</p>
+          <p className="text-sm text-ink-muted">{eligible.length} eligible · premiums include 18% GST</p>
         </div>
         <Card>
           <table className="w-full text-sm">
-            <thead className="text-left text-xs uppercase tracking-wide text-slate-500">
+            <thead className="text-left text-xs uppercase tracking-wide text-ink-faint">
               <tr>
                 <th className="px-5 py-2.5 font-medium">Plan</th>
                 <th className="px-5 py-2.5 font-medium">Category</th>
@@ -91,16 +91,16 @@ export default async function CustomerPage({ params }: PageProps<"/customers/[id
                 <th className="px-5 py-2.5" />
               </tr>
             </thead>
-            <tbody className="divide-y divide-slate-100">
+            <tbody className="divide-y divide-line-soft">
               {eligible.map((q) => (
                 <tr key={q.product.id}>
                   <td className="px-5 py-3">
                     <p className="font-medium">{q.product.name}</p>
-                    <p className="text-xs text-slate-500">{q.product.insurer}</p>
+                    <p className="text-xs text-ink-muted">{q.product.insurer}</p>
                   </td>
-                  <td className="px-5 py-3 text-slate-600">{CATEGORY_LABEL[q.product.category]}</td>
+                  <td className="px-5 py-3 text-ink-muted">{CATEGORY_LABEL[q.product.category]}</td>
                   <td className="px-5 py-3 tabular-nums">{formatCover(q.sumInsured)}</td>
-                  <td className="px-5 py-3 text-slate-600">{formatTerm(q.termYears)}</td>
+                  <td className="px-5 py-3 text-ink-muted">{formatTerm(q.termYears)}</td>
                   <td className="px-5 py-3 text-right font-semibold tabular-nums">{formatINR(q.totalPremium)}</td>
                   <td className="px-5 py-3 text-right">
                     {selected.has(q.product.id) ? (
@@ -118,17 +118,17 @@ export default async function CustomerPage({ params }: PageProps<"/customers/[id
         </Card>
 
         {ineligible.length > 0 && (
-          <details className="mt-4 rounded-xl border border-slate-200 bg-white px-5 py-3 text-sm">
-            <summary className="cursor-pointer font-medium text-slate-600">
+          <details className="mt-4 rounded-xl border border-line bg-surface px-5 py-3 text-sm">
+            <summary className="cursor-pointer font-medium text-ink-muted">
               {ineligible.length} plans not available for this customer
             </summary>
-            <ul className="mt-3 divide-y divide-slate-100">
+            <ul className="mt-3 divide-y divide-line-soft">
               {ineligible.map(({ product, reasons }) => (
                 <li key={product.id} className="flex justify-between gap-4 py-2">
                   <span>
-                    {product.name} <span className="text-slate-400">· {CATEGORY_LABEL[product.category]}</span>
+                    {product.name} <span className="text-ink-faint">· {CATEGORY_LABEL[product.category]}</span>
                   </span>
-                  <span className="text-right text-slate-500">{reasons.join(" · ")}</span>
+                  <span className="text-right text-ink-muted">{reasons.join(" · ")}</span>
                 </li>
               ))}
             </ul>

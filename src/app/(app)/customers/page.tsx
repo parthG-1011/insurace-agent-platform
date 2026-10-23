@@ -25,12 +25,12 @@ export default async function CustomersPage({ searchParams }: PageProps<"/custom
       </form>
       <Card>
         {rows.length === 0 ? (
-          <p className="px-5 py-10 text-center text-sm text-slate-500">
+          <p className="px-5 py-10 text-center text-sm text-ink-muted">
             {search ? "No customers match your search." : "No customers yet."}
           </p>
         ) : (
           <table className="w-full text-sm">
-            <thead className="text-left text-xs uppercase tracking-wide text-slate-500">
+            <thead className="text-left text-xs uppercase tracking-wide text-ink-faint">
               <tr>
                 <th className="px-5 py-2.5 font-medium">Name</th>
                 <th className="px-5 py-2.5 font-medium">Phone</th>
@@ -39,28 +39,28 @@ export default async function CustomersPage({ searchParams }: PageProps<"/custom
                 <th className="px-5 py-2.5 font-medium">Added</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-slate-100">
+            <tbody className="divide-y divide-line-soft">
               {rows.map(({ customer, latest }) => (
-                <tr key={customer.id} className="hover:bg-slate-50">
+                <tr key={customer.id} className="hover:bg-elevated">
                   <td className="px-5 py-3">
-                    <Link href={`/customers/${customer.id}`} className="font-medium text-blue-700 hover:underline">
+                    <Link href={`/customers/${customer.id}`} className="font-medium text-accent-ink hover:text-accent-hover hover:underline">
                       {customer.name}
                     </Link>
-                    <p className="text-xs text-slate-500">{customer.email}</p>
+                    <p className="text-xs text-ink-muted">{customer.email}</p>
                   </td>
-                  <td className="px-5 py-3 tabular-nums text-slate-700">{formatPhone(customer.phone)}</td>
-                  <td className="px-5 py-3 text-slate-700">{customer.city}</td>
+                  <td className="px-5 py-3 tabular-nums text-ink-strong">{formatPhone(customer.phone)}</td>
+                  <td className="px-5 py-3 text-ink-strong">{customer.city}</td>
                   <td className="px-5 py-3">
                     {latest ? (
                       <div className="flex items-center gap-2">
                         <StatusBadge status={latest.status} />
-                        <span className="text-slate-600">{latest.productName}</span>
+                        <span className="text-ink-muted">{latest.productName}</span>
                       </div>
                     ) : (
-                      <span className="text-slate-400">No plan selected</span>
+                      <span className="text-ink-faint">No plan selected</span>
                     )}
                   </td>
-                  <td className="px-5 py-3 text-slate-500">{formatDate(customer.createdAt)}</td>
+                  <td className="px-5 py-3 text-ink-muted">{formatDate(customer.createdAt)}</td>
                 </tr>
               ))}
             </tbody>

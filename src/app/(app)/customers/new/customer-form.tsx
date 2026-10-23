@@ -9,7 +9,7 @@ function Section({ title, description, children }: { title: string; description:
     <Card className="grid grid-cols-3 gap-8 p-6">
       <div>
         <h2 className="font-semibold">{title}</h2>
-        <p className="mt-1 text-sm text-slate-500">{description}</p>
+        <p className="mt-1 text-sm text-ink-muted">{description}</p>
       </div>
       <div className="col-span-2 grid grid-cols-2 gap-4">{children}</div>
     </Card>
@@ -57,12 +57,12 @@ export function CustomerForm() {
         <Field label="Dependants" name="dependants" error={e.dependants} hint="Spouse, children or parents to cover">
           <input id="dependants" name="dependants" type="number" min={0} max={10} defaultValue={v.dependants ?? "0"} className={inputStyles} />
         </Field>
-        <label className="flex items-center gap-2 text-sm text-slate-700">
-          <input type="checkbox" name="smoker" defaultChecked={v.smoker === "on"} className="h-4 w-4 rounded border-slate-300" />
+        <label className="flex items-center gap-2 text-sm text-ink-strong">
+          <input type="checkbox" name="smoker" defaultChecked={v.smoker === "on"} className="h-4 w-4 rounded border-line" />
           Smokes or uses tobacco
         </label>
-        <label className="flex items-center gap-2 text-sm text-slate-700">
-          <input type="checkbox" name="preExistingCondition" defaultChecked={v.preExistingCondition === "on"} className="h-4 w-4 rounded border-slate-300" />
+        <label className="flex items-center gap-2 text-sm text-ink-strong">
+          <input type="checkbox" name="preExistingCondition" defaultChecked={v.preExistingCondition === "on"} className="h-4 w-4 rounded border-line" />
           Has a pre-existing medical condition
         </label>
       </Section>
@@ -89,7 +89,7 @@ export function CustomerForm() {
       </Section>
 
       <div className="flex items-center justify-end gap-3">
-        {state?.error && <p className="text-sm text-red-600">{state.error}</p>}
+        {state?.error && <p className="text-sm text-danger-ink">{state.error}</p>}
         <button type="submit" disabled={pending} className={buttonStyles.primary}>
           {pending ? "Saving…" : "Save & see eligible plans"}
         </button>
