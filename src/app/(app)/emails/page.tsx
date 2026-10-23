@@ -16,7 +16,7 @@ export default async function EmailsPage() {
         description="Every policy confirmation email the platform has tried to send, with the provider's result."
       />
       {rows.length === 0 ? (
-        <Card className="px-5 py-10 text-center text-sm text-slate-500">No emails yet. They appear here once a customer pays.</Card>
+        <Card className="px-5 py-10 text-center text-sm text-ink-muted">No emails yet. They appear here once a customer pays.</Card>
       ) : (
         <div className="space-y-3">
           {rows.map(({ email, customerName, customerId, productName }) => (
@@ -25,25 +25,25 @@ export default async function EmailsPage() {
                 <summary className="flex cursor-pointer items-center justify-between gap-4 px-5 py-4 text-sm">
                   <div className="min-w-0">
                     <p className="truncate font-medium">{email.subject}</p>
-                    <p className="text-slate-500">
+                    <p className="text-ink-muted">
                       To {email.to} ·{" "}
-                      <Link href={`/customers/${customerId}`} className="text-blue-700 hover:underline">
+                      <Link href={`/customers/${customerId}`} className="text-accent-ink hover:text-accent-hover hover:underline">
                         {customerName}
                       </Link>{" "}
                       · {productName}
                     </p>
                   </div>
                   <div className="flex shrink-0 items-center gap-3">
-                    {email.error && <span className="max-w-xs truncate text-xs text-slate-500">{email.error}</span>}
+                    {email.error && <span className="max-w-xs truncate text-xs text-ink-muted">{email.error}</span>}
                     <Badge tone={TONE[email.status]}>{email.status}</Badge>
-                    <span className="text-xs text-slate-500">{formatDateTime(email.createdAt)}</span>
+                    <span className="text-xs text-ink-muted">{formatDateTime(email.createdAt)}</span>
                   </div>
                 </summary>
                 <iframe
                   title={email.subject}
                   srcDoc={email.html}
                   sandbox=""
-                  className="h-[560px] w-full border-t border-slate-100"
+                  className="h-[560px] w-full border-t border-line-soft"
                 />
               </details>
             </Card>

@@ -19,7 +19,7 @@ export function Sidebar({ agentName, agentEmail }: { agentName: string; agentEma
     pathname === href || (href === "/customers" && /^\/customers\/\d+/.test(pathname));
 
   return (
-    <aside className="sticky top-0 flex h-screen w-60 shrink-0 flex-col border-r border-slate-200 bg-white px-4 py-6">
+    <aside className="sticky top-0 flex h-screen w-60 shrink-0 flex-col border-r border-line bg-surface px-4 py-6">
       <Logo className="px-2" />
       <nav className="mt-8 flex flex-1 flex-col gap-1">
         {NAV.map((item) => (
@@ -28,18 +28,18 @@ export function Sidebar({ agentName, agentEmail }: { agentName: string; agentEma
             href={item.href}
             className={cx(
               "rounded-lg px-3 py-2 text-sm font-medium",
-              isActive(item.href) ? "bg-blue-50 text-blue-800" : "text-slate-600 hover:bg-slate-100 hover:text-slate-900",
+              isActive(item.href) ? "bg-accent-tint text-accent-ink" : "text-ink-muted hover:bg-elevated hover:text-ink",
             )}
           >
             {item.label}
           </Link>
         ))}
       </nav>
-      <div className="border-t border-slate-200 px-2 pt-4">
-        <p className="truncate text-sm font-medium text-slate-900">{agentName}</p>
-        <p className="truncate text-xs text-slate-500">{agentEmail}</p>
+      <div className="border-t border-line px-2 pt-4">
+        <p className="truncate text-sm font-medium text-ink">{agentName}</p>
+        <p className="truncate text-xs text-ink-muted">{agentEmail}</p>
         <form action={logoutAction}>
-          <button type="submit" className="mt-3 text-sm font-medium text-slate-600 hover:text-slate-900">
+          <button type="submit" className="mt-3 text-sm font-medium text-ink-muted hover:text-ink">
             Sign out
           </button>
         </form>

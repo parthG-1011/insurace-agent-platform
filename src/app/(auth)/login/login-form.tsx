@@ -16,13 +16,13 @@ export function LoginForm({ next }: { next?: string }) {
       <Field label="Password" name="password">
         <input id="password" name="password" type="password" required autoComplete="current-password" className={inputStyles} />
       </Field>
-      {state?.error && <p className="rounded-lg bg-red-50 px-3 py-2 text-sm text-red-700">{state.error}</p>}
+      {state?.error && <p className="rounded-lg bg-danger-tint px-3 py-2 text-sm text-danger-ink">{state.error}</p>}
       <button type="submit" disabled={pending} className={`${buttonStyles.primary} w-full`}>
         {pending ? "Signing in…" : "Sign in"}
       </button>
-      <p className="text-center text-sm text-slate-500">
+      <p className="text-center text-sm text-ink-muted">
         New agent?{" "}
-        <Link href="/signup" className="font-medium text-blue-700 hover:underline">
+        <Link href="/signup" className="font-medium text-accent-ink hover:text-accent-hover hover:underline">
           Create an account
         </Link>
       </p>
